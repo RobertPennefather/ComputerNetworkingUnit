@@ -1,0 +1,41 @@
+Compile Server:
+	java -Djavax.net.ssl.keyStore=mySrvKeystore -Djavax.net.ssl.keyStorePassword=123456 Server arguments
+
+Compile Client:
+	java -Djavax.net.ssl.trustStore=mySrvKeystore -Djavax.net.ssl.trustStorePassword=123456 Client arguments
+
+Create Key:
+	openssl genrsa -des3 -out ca.key 2048
+
+Create Public - Private key pair:
+	openssl genrsa -out mykey.pem 2048
+	
+Extract the public:
+	openssl rsa -in mykey.pem -pubout > mykey.pub
+	
+Create Certificate:
+	openssl req -new -x509 -days 365 -key ca.key -out ca.crt
+	
+Create Certificate signing request: # self-signed
+	openssl req -new -key client.key -out client.csr 
+	
+Create and Sign Certificate with another Certificate:
+	openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+	
+Create Keystore with Certificate inside:
+	keytool -genkey -keystore mySrvKeystore -keyalg RSA
+
+Create store with temporary key inside:
+	keytool -genkey -alias temp -keystore mySrvKeystore -storepass 123456
+
+Delete certificate from keystore:
+	keytool -delete -alias temp -keystore mySrvKeystore -storepass 123456 
+	
+List contents of keystore:
+	keytool -list -keystore mySrvKeystore -storepass 123456
+
+Upload new file to keystore:
+	keytool -import -alias alias -file cert_file.crt -keypass keypass -keystore mySrvKeystore -storepass 123456
+
+
+
